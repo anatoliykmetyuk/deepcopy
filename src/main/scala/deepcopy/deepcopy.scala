@@ -22,7 +22,7 @@ object deepcopy {
 
   def main(args: Array[String]): Unit = {
     val b1 = Some(1)
-    val b2 = apply(b1, List(copiers.option))
+    val b2 = apply(b1)
     println(b2)
     // println(Cont(Done(1), (x: Int) => Done(Some(x)), Set((1, null)), Map()).compute())
   }
