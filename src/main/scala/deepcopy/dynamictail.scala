@@ -27,7 +27,7 @@ object dynamictail {
     }
 
     @tailrec final def compute(): A = {
-      println(this)
+      // println(this)
       step match {
         case Right(a) => a
         case Left (p) => p.compute()

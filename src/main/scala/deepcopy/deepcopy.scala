@@ -15,17 +15,17 @@ object deepcopy {
   def Y(f: TotalCopier => TotalCopier): TotalCopier =
     a => f(Y(f))(a)
 
-  def apply[A](struct: A, cs: List[Copier] = copiers.all): Any =
-    Y(compileCopiers(cs))(struct).compute()
+  def apply[A](struct: A, cs: List[Copier] = copiers.all): A =
+    Y(compileCopiers(cs))(struct).compute().asInstanceOf[A]
 
-  case class Book(var author: String, var price: Int)
+  // case class Book(var author: String, var price: Int)
 
-  def main(args: Array[String]): Unit = {
-    val b1 = Some(1)
-    val b2 = apply(b1)
-    println(b2)
-    // println(Cont(Done(1), (x: Int) => Done(Some(x)), Set((1, null)), Map()).compute())
-  }
+  // def main(args: Array[String]): Unit = {
+  //   val b1 = Book("foo", 10)
+  //   val b2 = apply(b1, copiers.all)
+  //   println(b2)
+  //   // println(Cont(Done(1), (x: Int) => Done(Some(x)), Set((1, null)), Map()).compute())
+  // }
   // call(dc, x).map(Some(_))
 
 
