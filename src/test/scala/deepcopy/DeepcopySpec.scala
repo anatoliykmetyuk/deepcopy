@@ -16,6 +16,20 @@ class DeepcopySpec extends FlatSpec with Matchers {
     b2.author shouldBe "foo"
   }
 
+  it should "work in case of nested data structures" in {
+    val b  = Book("foo")
+    val l1 = List(List(List(Some(b), Some(2), None)))
+    val l2 = deepcopy(l1)
+    l1 shouldBe l2
+    b.author = "bar"
+
+    def lense(l: List[List[List[Option[Any]]]]) =
+      l.head.head.head.get.asInstanceOf[Book].author
+
+    lense(l1) shouldBe "bar"
+    lense(l2) shouldBe "foo"
+  }
+
   it should "work with sequence arguments" in {
     val b  = Book("foo")
     val a1 = Author(List(b))
