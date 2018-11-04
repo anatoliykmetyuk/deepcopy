@@ -4,7 +4,7 @@ lazy val commonSettings = Seq(
   name    := "deepcopy"
 , version := "0.1.0"
 , scalaVersion := ScalaVer
-, libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5"
+, libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test
 
 , scalacOptions ++= Seq(
       "-deprecation"
@@ -21,6 +21,8 @@ lazy val commonSettings = Seq(
     , "-Ywarn-dead-code"
     , "-Xfuture"
     , "-Ypartial-unification")
+
+  , testOptions in Test += Tests.Argument("-oF")
 )
 
 lazy val root = (project in file("."))
