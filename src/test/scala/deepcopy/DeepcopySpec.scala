@@ -61,17 +61,6 @@ class DeepcopySpec extends FlatSpec with Matchers {
     lense(e1).n shouldBe 20
     lense(e2).n shouldBe 10
   }
-
-  it should "work in case of graphical structures" in {
-    val ping = Ping("foo", null)
-    val pong1 = Pong(ping)
-    ping.pong = pong1
-    val pong2 = deepcopy(pong1)
-    ping.str = "bar"
-
-    pong1.owner.str shouldBe "bar"
-    pong2.owner.str shouldBe "foo"
-  }
 }
 
 object DeepcopySpecHelpers {
@@ -90,7 +79,4 @@ object DeepcopySpecHelpers {
   }
   case class Num(var n: Int) extends Expr
   case class Add(var left: Expr, var right: Expr) extends Expr
-
-  case class Ping(var str: String, var pong: Pong)
-  case class Pong(var owner: Ping)
 }

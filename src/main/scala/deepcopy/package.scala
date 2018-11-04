@@ -1,6 +1,6 @@
-package object deepcopy {
-  import dynamictail._
+import scala.util.control.TailCalls.{ tailcall => call, _ }
 
-  type TotalCopier = Any => DynRec[Any]
-  type Copier      = TotalCopier => PartialFunction[Any, DynRec[Any]]
+package object deepcopy {
+  type TotalCopier = Any => TailRec[Any]
+  type Copier      = TotalCopier => PartialFunction[Any, TailRec[Any]]
 }
