@@ -42,11 +42,11 @@ lazy val sonatypeSettings = Seq(
 
 lazy val commonSettings = sonatypeSettings ++ Seq(
   name    := "deepcopy"
-, version := "0.1.0"
+, version := "0.1.0-SNAPSHOT"
 , scalaVersion := ScalaVer
-, libraryDependencies ++= Seq(
-  , "org.scalatest" %% "scalatest" % "3.0.5" % Test
-  )
+, libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test
+
+, crossScalaVersions := Seq("2.11.8", "2.12.7")
 
 , scalacOptions ++= Seq(
       "-deprecation"
@@ -61,8 +61,8 @@ lazy val commonSettings = sonatypeSettings ++ Seq(
     // , "-Xlint"
     // , "-Yinline-warnings"
     , "-Ywarn-dead-code"
-    , "-Xfuture"
-    , "-Ypartial-unification")
+    , "-Xfuture")
+    // , "-Ypartial-unification")
 
   , testOptions in Test += Tests.Argument("-oF")
 )
