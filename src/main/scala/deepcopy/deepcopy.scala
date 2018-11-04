@@ -1,16 +1,20 @@
 package deepcopy
 
-object deepcopy {
-  def compileCopiers(dc: TotalCopier, copiers: List[Copier]): TotalCopier = {
-    val allCopiers = copiers.foldLeft({case _: Nothing => ()}: Copier) { (accum, next) =>
-      accum.orElse(next) }
+import dynamictail._
 
-    x => if (x.isDefinedAt(allCopiers)) allCopiers(x) else pure(x)
+
+object deepcopy {
+  def compileCopiers(copiers: List[Copier]): TotalCopier => TotalCopier = { tc =>
+    val allCopiers: PartialFunction[Any, DynRec[Any]] =
+      copiers.foldLeft(PartialFunction.empty[Any, DynRec[Any]]) {
+        (accum, next) => accum.orElse(next(tc)) }
+
+    x => if (allCopiers isDefinedAt x) allCopiers(x) else done(x)
   }
 
   def Y(f: TotalCopier => TotalCopier): TotalCopier =
     a => f(Y(f))(a)
 
-  def apply[A](struct: A, copiers: List[Copier] = copiers.all): A =
-    Y(compileCopiers(_, copiers))(struct).run.asInstanceOf[A]
+  def apply[A](struct: A, cs: List[Copier] = copiers.all): A =
+    Y(compileCopiers(cs))(struct).compute().asInstanceOf[A]
 }

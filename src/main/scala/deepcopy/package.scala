@@ -1,4 +1,6 @@
 package object deepcopy {
-  type TotalCopier = Any => Deepcopy[Any]
-  type Copier      = TotalCopier => PartialFunction[Any, Deepcopy[Any]]
+  import dynamictail._
+
+  type TotalCopier = Any => DynRec[Any]
+  type Copier      = TotalCopier => PartialFunction[Any, DynRec[Any]]
 }
