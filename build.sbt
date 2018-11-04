@@ -4,7 +4,10 @@ lazy val commonSettings = Seq(
   name    := "deepcopy"
 , version := "0.1.0"
 , scalaVersion := ScalaVer
-, libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test
+, libraryDependencies ++= Seq(
+    "org.typelevel" %% "cats-core" % "1.4.0"
+  , "org.scalatest" %% "scalatest" % "3.0.5" % Test
+  )
 
 , scalacOptions ++= Seq(
       "-deprecation"
@@ -28,5 +31,5 @@ lazy val commonSettings = Seq(
 lazy val root = (project in file("."))
   .settings(commonSettings)
   .settings(
-    initialCommands := "import deepcopy._, Main._"
+    initialCommands := "import deepcopy._"
   )

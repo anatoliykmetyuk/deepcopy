@@ -1,6 +1,9 @@
 package deepcopy
 
+import cats._, cats.implicits._
 import dynamictail._
+
+import java.lang.reflect.Method
 
 
 object copiers {
@@ -24,9 +27,23 @@ object copiers {
   def product: Copier = dc => { case x: Product =>
     val clazz       = x.getClass
     val constructor = clazz.getConstructors.head
-    val parameters  = x.productIterator.toList
+    val parameters  = x.productIterator.toList.asInstanceOf[List[Object]]
+    
+    def copyParams(ref: Any): DynRec[Unit] = {
+      val setters = clazz.getDeclaredMethods.filter(_.getName.endsWith("_$eq")).toList
+      val gettersAndSetters: List[(Method, Method)] = setters.flatMap(setter =>
+        clazz.getDeclaredMethods.find { _.getName == setter.getName.reverse.drop(4).reverse }
+          .map { getter => setter -> getter })
 
-    call(dc, parameters).as[List[Object]].map { params =>
-      constructor.newInstance(params: _*) }
+      gettersAndSetters.traverse { case (setter, getter) =>
+        val original = getter.invoke(ref)
+        dc(original).map { copied => setter.invoke(ref, copied.asInstanceOf[Object]) }
+      } >> ().pure[DynRec]
+    }
+
+    for {
+      reference <- doneFor((x, dc))(constructor.newInstance(parameters: _*))
+      _         <- copyParams(reference)
+    } yield reference
   }
 }

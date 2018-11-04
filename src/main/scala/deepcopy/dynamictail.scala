@@ -1,6 +1,7 @@
 package deepcopy
 
 import annotation.tailrec
+import cats._, cats.implicits._
 
 
 object dynamictail {
@@ -19,11 +20,11 @@ object dynamictail {
           }
         })
 
-      case Cont(Cont(Done(a), f, _, _), ff, stack, mem) if mem.isDefinedAt((a, f)) =>
-        Left(Cont(Done(mem((a, f))), ff, stack, mem))
+      case Cont(Cont(Done(a), f, _, m), ff, stack, mem) if (mem ++ m).isDefinedAt((a, f)) =>
+        Left(Cont(Done(mem((a, f))), ff, stack, mem ++ m))
 
-      case Cont(Cont(d: DynRec[a], f, s, m), ff, stack, mem) if s.isEmpty && m.isEmpty =>
-        Left(Cont(d, (x: a) => Cont(f(x), ff, stack + ((x, f)), Map.empty), Set.empty, mem))
+      case Cont(Cont(d: DynRec[a], f, _, m), ff, stack, mem) =>
+        Left(Cont(d, (x: a) => Cont(f(x), ff, stack + ((x, f)), Map.empty), Set.empty, mem ++ m))
     }
 
     @tailrec final def compute(): A = {
@@ -34,9 +35,6 @@ object dynamictail {
       }
     }
 
-    def flatMap[B](f: A => DynRec[B]): DynRec[B] = dynamictail.flatMap(this)(f)
-    def map    [B](f: A => B        ): DynRec[B] = dynamictail.map    (this)(f)
-
     def as[B]: DynRec[B] = this.asInstanceOf[DynRec[B]]
   }
 
@@ -44,8 +42,23 @@ object dynamictail {
   case class Cont[A, B](d: DynRec[A], f: A => DynRec[B]
     , stack: Set[CallSig], memory: Map[CallSig, Any]) extends DynRec[B]
 
+  object DynRec {
+    implicit val monad: Monad[DynRec] = new Monad[DynRec] {
+      override def flatMap[A, B](fa: DynRec[A])(f: A => DynRec[B]): DynRec[B] = dynamictail.flatMap(fa)(f)
+      override def map    [A, B](fa: DynRec[A])(f: A => B        ): DynRec[B] = dynamictail.map    (fa)(f)
+      override def pure   [A   ](a : A                           ): DynRec[A] = dynamictail.done   (a )
+
+      override def tailRecM[A, B](a: A)(f: A => DynRec[Either[A,B]]): DynRec[B] =
+        f(a).flatMap {
+          case Right(b) => pure(b)
+          case Left (a) => tailRecM(a)(f)
+        }
+    }
+  }
+
   def done   [A   ](a: A                            ): DynRec[A] = Done(a)
   def flatMap[A, B](da: DynRec[A])(f: A => DynRec[B]): DynRec[B] = Cont(da, f, Set.empty, Map.empty)
   def call   [A, B](f: A => DynRec[B], a: A         ): DynRec[B] = flatMap(done(a))(f)
   def map    [A, B](pa: DynRec[A])(f: A => B        ): DynRec[B] = flatMap(pa)(a => done(f(a)))
+  def doneFor[A   ](arg: CallSig)(res: A            ): DynRec[A] = Cont[A, A](Done(res), Done(_), Set.empty, Map(arg -> res))
 }
