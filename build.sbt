@@ -42,7 +42,7 @@ lazy val sonatypeSettings = Seq(
 
 lazy val commonSettings = sonatypeSettings ++ Seq(
   name    := "deepcopy"
-, version := "0.1.0-SNAPSHOT"
+, version := "0.1.0"
 , scalaVersion := ScalaVer
 , libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test
 
